@@ -30,7 +30,7 @@ export default new Vuex.Store({
 
             let decodedJwt = VueJwtDecode.decode(successfulData.success.data[0].access_token)
             let user = {
-                access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1NTU0MTIxMjQsImV4cCI6MTU4Njk0ODE1NCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.c31tP4CVu_XILrwOq0DNy5hwPMen47DmkdZha6AJOo4'
+                access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1NTU0MjYzODYsImV4cCI6MTU4Njk2MjM4NywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.tFRXHG9JKat1Y-S_5Ptoxcmt_eWVWQWe7DiS7kk2ca4'
             }
 
             let success = successfulData.success.OK && successfulData.success.headers.XCSRFToken && 
@@ -47,11 +47,10 @@ export default new Vuex.Store({
                     return
                 }
                 
-                let expireDate = new Date(decodedJwt.exp*1000).toUTCString();
+                let expireDate = new Date(decodedJwt.exp*1000).toUTCString()
 
                 commit('loginSuccess')
                 Vue.cookie.set('token', successfulData.success.data[0].access_token, {expires: expireDate}) // Set secure: true in real app when using https
-
                 router.replace({ name: "secure" })
             }
         },
