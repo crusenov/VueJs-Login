@@ -1,12 +1,14 @@
 import Vue from 'vue'
-import VueCookie from 'vue-cookie'
 import Vuex from 'vuex'
+import VueCookie from 'vue-cookie'
+import VueJwtDecode from 'vue-jwt-decode'
 import router from '../router'
 import successfulData from './successful_login.json'
 import unsuccessfulData from './unsuccessful_login.json'
 
 Vue.use(Vuex)
 Vue.use(VueCookie)
+Vue.use(VueJwtDecode)
 
 export default new Vuex.Store({
     state: {
@@ -26,26 +28,35 @@ export default new Vuex.Store({
     actions: {
         login({ commit }, { username, password }) {
 
-            console.log(username, password)
+            console.log(this, username, password)
 
             let user = {
                 username: 'Johnny',
                 password: 'password',
-                access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1NTUyNTU1MDEsImV4cCI6MTU4Njc5MTQ5OCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.A6NEUAXtGoa8ZbyqEp-UWK31UDSq5NzYSayPRvt9Xl4'
+                access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1NTU0MTIxMjQsImV4cCI6MTU4Njk0ODE1NCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.c31tP4CVu_XILrwOq0DNy5hwPMen47DmkdZha6AJOo4'
             }
 
             let success = successfulData.success.OK && successfulData.success.headers.XCSRFToken && 
                             successfulData.success.data[0].access_token === user.access_token && 
-                            successfulData.success.data[0].GivenName === user.username;
+                            successfulData.success.data[0].GivenName === username;
             let fail = unsuccessfulData.success.OK;
 
             if (!success || fail) {
-                    commit('loginFailure')
+                commit('loginFailure')
             } else if (success) {
-                    commit('loginSuccess')
-                    Vue.cookie.set('token', successfulData.success.data[0].access_token)
+                let decodedJwt = VueJwtDecode.decode(successfulData.success.data[0].access_token)
 
-                    router.replace({ name: "secure" })
+                if (Date.now() / 1000 > decodedJwt.exp) {
+                    commit('loginFailure')
+                    return
+                }
+                
+                let expireDate = new Date(decodedJwt.exp*1000).toUTCString();
+
+                commit('loginSuccess')
+                Vue.cookie.set('token', successfulData.success.data[0].access_token, {expires: expireDate}) // Set secure: true in real app when using https
+
+                router.replace({ name: "secure" })
             }
         },
         logout({ commit }) {
