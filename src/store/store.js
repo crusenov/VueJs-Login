@@ -28,23 +28,19 @@ export default new Vuex.Store({
     actions: {
         login({ commit }, { username, password }) {
 
-            console.log(this, username, password)
-
+            let decodedJwt = VueJwtDecode.decode(successfulData.success.data[0].access_token)
             let user = {
-                username: 'Johnny',
-                password: 'password',
                 access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE1NTU0MTIxMjQsImV4cCI6MTU4Njk0ODE1NCwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsIkdpdmVuTmFtZSI6IkpvaG5ueSIsIlN1cm5hbWUiOiJSb2NrZXQiLCJFbWFpbCI6Impyb2NrZXRAZXhhbXBsZS5jb20iLCJSb2xlIjpbIk1hbmFnZXIiLCJQcm9qZWN0IEFkbWluaXN0cmF0b3IiXX0.c31tP4CVu_XILrwOq0DNy5hwPMen47DmkdZha6AJOo4'
             }
 
             let success = successfulData.success.OK && successfulData.success.headers.XCSRFToken && 
-                            successfulData.success.data[0].access_token === user.access_token && 
-                            successfulData.success.data[0].GivenName === username;
-            let fail = unsuccessfulData.success.OK;
+                            successfulData.success.data[0].access_token === user.access_token &&
+                            decodedJwt.GivenName === username
+            let fail = unsuccessfulData.success.OK
 
             if (!success || fail) {
                 commit('loginFailure')
             } else if (success) {
-                let decodedJwt = VueJwtDecode.decode(successfulData.success.data[0].access_token)
 
                 if (Date.now() / 1000 > decodedJwt.exp) {
                     commit('loginFailure')
